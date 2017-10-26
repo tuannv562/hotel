@@ -1,6 +1,7 @@
 package com.hotel.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
@@ -16,7 +17,7 @@ public class Hotel {
     private Long id;
 
     @NotNull
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "address_id", nullable = false)
     @JsonBackReference(value = "hotel-address")
     private Address address;
@@ -24,7 +25,7 @@ public class Hotel {
     @NotNull
     private String name;
 
-    @OneToMany(mappedBy = "hotel")
+    @OneToMany(mappedBy = "hotel", fetch = FetchType.LAZY)
     @JsonManagedReference(value = "employee-hotel")
     private Set<Employee> employees;
 

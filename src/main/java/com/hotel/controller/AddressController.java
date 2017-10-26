@@ -41,13 +41,20 @@ public class AddressController {
         if (checkAddress == null) {
             return new ResponseEntity(new Message("This address id does not exist"), HttpStatus.NOT_FOUND);
         } else {
-            checkAddress.setAddress1(address.getAddress1());
-            checkAddress.setAddress2(address.getAddress2());
-            checkAddress.setAddress3(address.getAddress3());
-            checkAddress.setCity(address.getCity());
-            checkAddress.setState(address.getState());
-            checkAddress.setCountry(address.getCountry());
-            checkAddress.setPostalCode(address.getPostalCode());
+            if (address.getAddress1() != null && !address.getAddress1().trim().isEmpty())
+                checkAddress.setAddress1(address.getAddress1());
+            if (address.getAddress2() != null && !address.getAddress2().trim().isEmpty())
+                checkAddress.setAddress2(address.getAddress2());
+            if (address.getAddress3() != null && !address.getAddress3().trim().isEmpty())
+                checkAddress.setAddress3(address.getAddress3());
+            if (address.getCity() != null && address.getCity().trim().isEmpty())
+                checkAddress.setCity(address.getCity());
+            if (address.getState() != null && !address.getState().trim().isEmpty())
+                checkAddress.setState(address.getState());
+            if (!address.getCountry().trim().isEmpty())
+                checkAddress.setCountry(address.getCountry());
+            if (address.getPostalCode() != null)
+                checkAddress.setPostalCode(address.getPostalCode());
             return new ResponseEntity(repository.save(checkAddress), HttpStatus.OK);
         }
     }

@@ -39,22 +39,40 @@ public class EmployeeController {
     @PutMapping(value = "/{employeeId}")
     @ResponseBody
     public ResponseEntity updateEmployee(@PathVariable Long employeeId, @RequestBody EmployeeDTO employeeDTO) {
-        Address address = addressRepository.findOne(employeeDTO.getAddressId());
-        if (address == null) return new ResponseEntity(new Message("Address ID does not exist"), HttpStatus.NOT_FOUND);
-        Hotel hotel = hotelRepository.findOne(employeeDTO.getHotelId());
-        if (hotel == null) return new ResponseEntity(new Message("Hotel ID does not exist"), HttpStatus.NOT_FOUND);
-        Employee employee = employeeRepository.findByIdNumber(employeeDTO.getIdNumber());
+        Address address = null;
+        Hotel hotel = null;
+        if (employeeDTO.getAddressId() != null) {
+            address = addressRepository.findOne(employeeDTO.getAddressId());
+            if (address == null)
+                return new ResponseEntity(new Message("Address ID does not exist"), HttpStatus.NOT_FOUND);
+        }
+        if (employeeDTO.getHotelId() != null) {
+            hotel = hotelRepository.findOne(employeeDTO.getHotelId());
+            if (hotel == null) return new ResponseEntity(new Message("Hotel ID does not exist"), HttpStatus.NOT_FOUND);
+        }
+        Employee employee = employeeRepository.findOne(employeeId);
         if (employee == null) {
             return new ResponseEntity(new Message("Employee ID does not exist"), HttpStatus.NOT_FOUND);
-        } else {
-            employee.setName(employeeDTO.getName());
-            employee.setDateOfBirth(employeeDTO.getDateOfBirth());
-            employee.setGender(employeeDTO.getGender());
-            employee.setIdNumber(employeeDTO.getIdNumber());
-            employee.setAddress(address);
-            employee.setHotel(hotel);
-            return new ResponseEntity(employeeRepository.save(employee), HttpStatus.OK);
         }
+        if (employeeDTO.getIdNumber() != null && !employeeDTO.getIdNumber().trim().isEmpty()) {
+            Employee employeeWithIdNumber = employeeRepository.findByIdNumber(employeeDTO.getIdNumber());
+            if (employeeWithIdNumber != null) {
+                return new ResponseEntity(new Message("ID number already existed"), HttpStatus.CONFLICT);
+            }
+            employee.setIdNumber(employeeDTO.getIdNumber());
+        }
+        if (employeeDTO.getName() != null && !employeeDTO.getName().trim().isEmpty())
+            employee.setName(employeeDTO.getName());
+        if (employeeDTO.getDateOfBirth() != null)
+            employee.setDateOfBirth(employeeDTO.getDateOfBirth());
+        if (employeeDTO.getGender() != null)
+            employee.setGender(employeeDTO.getGender());
+        if (address != null)
+            employee.setAddress(address);
+        if (hotel != null)
+            employee.setHotel(hotel);
+        return new ResponseEntity(employeeRepository.save(employee), HttpStatus.OK);
+
     }
 
     @PostMapping

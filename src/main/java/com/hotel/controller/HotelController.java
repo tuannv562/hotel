@@ -30,23 +30,29 @@ public class HotelController {
     @GetMapping(value = "/{hotelId}")
     @ResponseBody
     public ResponseEntity getHotel(@PathVariable Long hotelId) {
-        Hotel checkHotel = hotelRepository.findOne(hotelId);
-        if (checkHotel == null) return new ResponseEntity(new Message("Hotel ID does not exist"), HttpStatus.NOT_FOUND);
-        else return new ResponseEntity(checkHotel, HttpStatus.OK);
+        Hotel hotel = hotelRepository.findOne(hotelId);
+        if (hotel == null) return new ResponseEntity(new Message("Hotel ID does not exist"), HttpStatus.NOT_FOUND);
+        else return new ResponseEntity(hotel, HttpStatus.OK);
     }
 
     @PutMapping(value = "/{hotelId}")
     @ResponseBody
     public ResponseEntity updateHotel(@PathVariable Long hotelId, @RequestBody HotelDTO hotelDTO) {
-        Address address = addressRepository.findOne(hotelDTO.getAddressId());
-        if (address == null) return new ResponseEntity(new Message("Address ID does not exist"), HttpStatus.NOT_FOUND);
         Hotel hotel = hotelRepository.findOne(hotelId);
-        if (hotel == null) return new ResponseEntity(new Message("Hotel ID does not exist"), HttpStatus.NOT_FOUND);
-        else {
-            hotel.setName(hotelDTO.getName());
+        if (hotel == null)
+            return new ResponseEntity(new Message("Hotel ID does not exist"), HttpStatus.NOT_FOUND);
+        if (hotelDTO.getAddressId() != null) {
+            Address address = addressRepository.findOne(hotelDTO.getAddressId());
+            if (address == null)
+                return new ResponseEntity(new Message("Address ID does not exist"), HttpStatus.NOT_FOUND);
+            Hotel hotelWithAddress = hotelRepository.findByAddressId(hotelDTO.getAddressId());
+            if (hotelWithAddress != null)
+                return new ResponseEntity(new Message("There is a hotel exist in this address"), HttpStatus.CONFLICT);
             hotel.setAddress(address);
-            return new ResponseEntity(hotelRepository.save(hotel), HttpStatus.OK);
         }
+        if (hotelDTO.getName() != null && !hotelDTO.getName().trim().isEmpty())
+            hotel.setName(hotelDTO.getName());
+        return new ResponseEntity(hotelRepository.save(hotel), HttpStatus.OK);
     }
 
     @PostMapping
@@ -56,8 +62,8 @@ public class HotelController {
         Hotel checkHotel = hotelRepository.findByAddressId(hotelDTO.getAddressId());
         if (checkHotel == null) {
             Hotel hotel = new Hotel(hotelDTO.getName(), address);
-            hotel.setAddress(address);
             return new ResponseEntity(hotelRepository.save(hotel), HttpStatus.CREATED);
-        } else return new ResponseEntity(new Message("There is a hotel in this place"), HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity(new Message("There is a hotel in this place"), HttpStatus.CONFLICT);
     }
 }

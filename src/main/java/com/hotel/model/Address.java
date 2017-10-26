@@ -1,5 +1,6 @@
 package com.hotel.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
@@ -31,11 +32,11 @@ public class Address {
     @NotNull
     private Long postalCode;
 
-    @OneToMany(mappedBy = "address")
+    @OneToMany(mappedBy = "address", fetch = FetchType.LAZY)
     @JsonManagedReference(value = "employee-address")
     private Set<Employee> employees;
 
-    @OneToOne(mappedBy = "address")
+    @OneToOne(mappedBy = "address", fetch = FetchType.EAGER)
     @JsonManagedReference(value = "hotel-address")
     private Hotel hotel;
 
